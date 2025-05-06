@@ -52,9 +52,14 @@ def find_cc_toolchain(ctx, extra_unsupported_features = tuple()):
         extra_unsupported_features (sequence of str): Extra featrures to disable
 
     Returns:
-        tuple: A tuple of (CcToolchain, FeatureConfiguration)
+        tuple: A tuple of (CcToolchainProvider, FeatureConfiguration)
     """
-    cc_toolchain = find_rules_cc_toolchain(ctx)
+    if not hasattr(ctx.attr, "_cc_toolchain"):
+        fail("In order to use find_cc_toolchain, your rule has to depend on C++ toolchain. See find_cc_toolchain.bzl docs for details.")
+    if hasattr(ctx.attr._cc_toolchain, "cc_provider"):
+        cc_toolchain = ctx.attr._cc_toolchain.cc_provider
+    else:
+        cc_toolchain = find_rules_cc_toolchain(ctx)
 
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
